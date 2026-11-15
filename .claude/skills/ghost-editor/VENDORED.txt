@@ -1,0 +1,1 @@
+ghost-editor @ ce17272 (2026-10-30) — nguồn: https://github.com/kurbaitaev/ghost-editor (MIT). Bỏ docs/media cho nhẹ.

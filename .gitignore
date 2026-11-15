@@ -1,0 +1,8 @@
+# Video nặng: không commit
+Video-Edit/**/*.mov
+Video-Edit/**/*.mp4
+Video-Edit/**/*.MOV
+Video-Edit/**/*.wav
+Video-Edit/01-projects/*/build/
+Video-Edit/01-projects/*/assets/
+.claude/skills/ghost-editor/.env
