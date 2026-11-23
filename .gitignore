@@ -6,3 +6,5 @@ Video-Edit/**/*.wav
 Video-Edit/01-projects/*/build/
 Video-Edit/01-projects/*/assets/
 .claude/skills/ghost-editor/.env
+node_modules/
+Video-Edit/01-projects/*/out/*.png
