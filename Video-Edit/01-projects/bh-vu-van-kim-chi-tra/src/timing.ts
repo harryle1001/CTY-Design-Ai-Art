@@ -1,6 +1,8 @@
 // ⏱ Mốc thời gian (giây) — ƯỚC LƯỢNG. Khi có video thật: đặt public/talk.mp4, HAS_VIDEO = true,
 // rồi chỉnh các mốc theo lời thoại thật (hoặc nạp words.json có thời gian từng chữ).
 export const HAS_VIDEO = false;
+// Video nhép miệng (SadTalker) cho các đoạn người dẫn hiện to: [file, giây bắt đầu, giây kết thúc]
+export const LIP: [string, number, number][] = [['lip/lip1.mp4', 0, 18.66], ['lip/lip2.mp4', 86.46, 97.8]];
 export const FPS = 30;
 export const fr = (s: number) => Math.round(s * FPS);
 export type Kind = 'full' | 'graphic' | 'cta';

@@ -1,7 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Img, OffthreadVideo, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {T} from './theme';
-import {HAS_VIDEO, VOICE_FILE} from './timing';
+import {HAS_VIDEO, LIP, VOICE_FILE, fr} from './timing';
 import {useAudioData, visualizeAudio} from '@remotion/media-utils';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
@@ -85,7 +85,13 @@ export const Talent: React.FC<{from: number; style?: React.CSSProperties; zoom?:
     {HAS_VIDEO ? (
       <OffthreadVideo src={staticFile('talk.mp4')} startFrom={from} muted
         style={{width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${zoom})`, transformOrigin: '50% 30%'}} />
-    ) : <Presenter from={from} zoom={zoom} />}
+    ) : (() => {
+      const lip = LIP.find(([, a, b]) => from >= fr(a) && from < fr(b));
+      return lip ? (
+        <OffthreadVideo src={staticFile(lip[0])} startFrom={from - fr(lip[1])} muted
+          style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 20%', transform: `scale(${zoom})`, transformOrigin: '50% 32%'}} />
+      ) : <Presenter from={from} zoom={zoom} />;
+    })()}
   </div>
 );
 
