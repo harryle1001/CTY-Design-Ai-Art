@@ -1,7 +1,8 @@
 import React from 'react';
 import {AbsoluteFill, Img, OffthreadVideo, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {T} from './theme';
-import {HAS_VIDEO} from './timing';
+import {HAS_VIDEO, VOICE_FILE} from './timing';
+import {useAudioData, visualizeAudio} from '@remotion/media-utils';
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
@@ -49,10 +50,10 @@ export const BottomStrip: React.FC = () => {
 };
 
 // Logo cắt từ khung (ảnh 2)
-export const LogoBadge: React.FC<{top?: number; scale?: number; delay?: number}> = ({top = 130, scale = 0.72, delay = 0}) => {
+export const LogoBadge: React.FC<{top?: number; scale?: number; delay?: number; right?: boolean}> = ({top = 130, scale = 0.72, delay = 0, right = false}) => {
   const s = useSpring(delay);
   return (
-    <div style={{position: 'absolute', top, width: '100%', display: 'flex', justifyContent: 'center', ...enter(s, 26)}}>
+    <div style={{position: 'absolute', top, width: '100%', display: 'flex', justifyContent: right ? 'flex-end' : 'center', paddingRight: right ? 26 : 0, boxSizing: 'border-box', ...enter(s, 26)}}>
       <div style={{background: T.glass, borderRadius: 26, padding: '10px 26px', boxShadow: T.shadow, backdropFilter: 'blur(10px)'}}>
         <div style={{width: 600 * scale, height: 152 * scale, backgroundImage: `url(${staticFile('frame.jpg')})`,
           backgroundSize: `${1080 * scale}px ${1920 * scale}px`, backgroundPosition: `${-238 * scale}px ${-247 * scale}px`}} />
@@ -84,9 +85,45 @@ export const Talent: React.FC<{from: number; style?: React.CSSProperties; zoom?:
     {HAS_VIDEO ? (
       <OffthreadVideo src={staticFile('talk.mp4')} startFrom={from} muted
         style={{width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${zoom})`, transformOrigin: '50% 30%'}} />
-    ) : <Placeholder zoom={zoom} />}
+    ) : <Presenter from={from} zoom={zoom} />}
   </div>
 );
+
+// Người dẫn từ ảnh tĩnh: Ken Burns + nhịp gật nhẹ theo âm lượng giọng đọc (không giả khẩu hình)
+export const useVoiceLevel = (from: number) => {
+  const f = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const data = useAudioData(staticFile(VOICE_FILE));
+  if (!data) return 0;
+  const g = from + f;
+  const s = visualizeAudio({fps, frame: g, audioData: data, numberOfSamples: 16});
+  return Math.min(1, (s.slice(0, 6).reduce((a, b) => a + b, 0) / 6) * 6);
+};
+const Presenter: React.FC<{from: number; zoom: number}> = ({from, zoom}) => {
+  const f = useCurrentFrame();
+  const lv = useVoiceLevel(from);
+  const kb = 1.02 + ((from + f) % 900) / 900 * 0.06; // phóng chậm, liền mạch qua các cảnh
+  const sway = Math.sin((from + f) / 47) * 6;
+  return (
+    <AbsoluteFill style={{background: '#1b2540'}}>
+      <Img src={staticFile('talent.jpg')} style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 20%',
+        transform: `scale(${kb * zoom}) translate(${sway}px, ${-lv * 5}px) rotate(${lv * 0.35}deg)`, transformOrigin: '50% 32%'}} />
+    </AbsoluteFill>
+  );
+};
+
+// Sóng âm nhỏ: báo hiệu người dẫn đang nói
+export const VoiceBars: React.FC<{from: number; style?: React.CSSProperties}> = ({from, style}) => {
+  const f = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const data = useAudioData(staticFile(VOICE_FILE));
+  const vals = data ? visualizeAudio({fps, frame: from + f, audioData: data, numberOfSamples: 32}).slice(1, 8) : [0, 0, 0, 0, 0, 0, 0];
+  return (
+    <div style={{display: 'flex', alignItems: 'center', gap: 6, height: 42, padding: '0 16px', borderRadius: 26, background: 'rgba(11,42,122,.8)', ...style}}>
+      {vals.map((v, i) => <div key={i} style={{width: 6, borderRadius: 3, background: '#fff', height: 8 + Math.min(1, v * 9) * 26}} />)}
+    </div>
+  );
+};
 
 export const Grade: React.FC = () => (
   <AbsoluteFill style={{pointerEvents: 'none'}}>

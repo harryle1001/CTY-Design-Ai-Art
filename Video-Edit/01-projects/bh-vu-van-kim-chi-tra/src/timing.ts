@@ -5,17 +5,19 @@ export const FPS = 30;
 export const fr = (s: number) => Math.round(s * FPS);
 export type Kind = 'full' | 'graphic' | 'cta';
 export const SCENES: {id: string; start: number; end: number; kind: Kind}[] = [
-  {id: 's1', start: 0, end: 6, kind: 'full'},
-  {id: 's2', start: 6, end: 17, kind: 'full'},
-  {id: 's3', start: 17, end: 67, kind: 'graphic'},
-  {id: 's4', start: 67, end: 75, kind: 'graphic'},
-  {id: 's5', start: 75, end: 86, kind: 'cta'},
+  {id: 's1', start: 0, end: 7.15, kind: 'full'},
+  {id: 's2', start: 7.15, end: 18.66, kind: 'full'},
+  {id: 's3', start: 18.66, end: 78.16, kind: 'graphic'},
+  {id: 's4', start: 78.16, end: 86.46, kind: 'graphic'},
+  {id: 's5', start: 86.46, end: 97.8, kind: 'cta'},
 ];
-export const TOTAL = 86;
+export const TOTAL = 97.8;
+// Giọng đọc AI (ElevenLabs · Ben Singapore). Mốc trên đã căn theo khoảng lặng của file này.
+export const VOICE_FILE = 'voice.mp3';
 export const HOOK_END = 2.2; // thẻ tiêu đề mở đầu (cũng là ảnh bìa reel)
-export const S2_ZOOM = 9; // giây: lúc chỉ tay vào chữ nhỏ → zoom
-export const S3 = {intro: [17, 25], i1: [25, 36], i2: [36, 50], i3: [50, 67]} as const;
-export const CTA_AT = 81; // giây: thẻ kêu gọi hiện ra
+export const S2_ZOOM = 8.4; // giây: lúc chỉ tay vào chữ nhỏ → zoom
+export const S3 = {intro: [18.66, 27.59], i1: [27.59, 40.45], i2: [40.45, 59.73], i3: [59.73, 78.16]} as const;
+export const CTA_AT = 89.6; // giây: thẻ kêu gọi hiện ra
 export const VOICE: {start: number; end: number; text: string}[] = [
   {start: 0, end: 6, text: 'Có hợp đồng bảo hiểm trên tay rồi... liệu cứ nằm viện hay gặp chuyện là 100% được chi trả không?'},
   {start: 6, end: 17, text: 'Câu trả lời là: KHÔNG PHẢI LÚC NÀO CŨNG ĐƯỢC CHI TRẢ. Rất nhiều tranh chấp xảy ra chỉ vì khách hàng nhầm lẫn 3 khái niệm này làm một: Quyền lợi, điều kiện chi trả và điều khoản loại trừ.'},

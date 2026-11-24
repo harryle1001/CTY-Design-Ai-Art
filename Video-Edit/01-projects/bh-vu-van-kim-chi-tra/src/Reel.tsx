@@ -1,7 +1,8 @@
 import React from 'react';
 import {AbsoluteFill, Audio, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {T, fontFamily} from './theme';
-import {CTA_AT, HAS_VIDEO, HOOK_END, KEYWORDS, S2_ZOOM, S3, SCENES, VOICE, fr} from './timing';
+import {CTA_AT, HAS_VIDEO, HOOK_END, KEYWORDS, S2_ZOOM, S3, SCENES, TOTAL, VOICE, VOICE_FILE, fr} from './timing';
+import REAL from './words.json';
 import {Grade, Grain, Vignette} from './components';
 import {Scene1, Scene2, Scene3, Scene4, Scene5} from './scenes';
 
@@ -10,7 +11,7 @@ const MAP: Record<string, React.FC<{from: number; dur: number}>> = {s1: Scene1, 
 
 // ——— Phụ đề theo từng chữ (thời gian ước lượng theo độ dài chữ; thay bằng words.json khi có video) ———
 type W = {w: string; s: number; e: number};
-const WORDS: W[] = VOICE.flatMap((v) => {
+const EST: W[] = VOICE.flatMap((v) => {
   const ws = v.text.split(/\s+/).filter(Boolean);
   const wt = ws.map((w) => w.length + 2 + (/[.,:?!]$/.test(w) ? 4 : 0));
   const tot = wt.reduce((a, b) => a + b, 0);
@@ -18,6 +19,8 @@ const WORDS: W[] = VOICE.flatMap((v) => {
   let t = v.start + 0.15;
   return ws.map((w, i) => {const d = (wt[i] / tot) * span; const o = {w, s: t, e: t + d}; t += d; return o;});
 });
+// Ưu tiên thời gian thật đã căn theo giọng đọc
+const WORDS: W[] = (REAL as W[]).length ? (REAL as W[]) : EST;
 type Page = {words: W[]; s: number; e: number};
 const PAGES: Page[] = (() => {
   const out: Page[] = []; let cur: W[] = [];
@@ -41,7 +44,7 @@ const Captions: React.FC = () => {
   if (!p || !sc) return null;
   const pop = spring({frame: f - fr(p.s), fps, config: {damping: 12, stiffness: 200, mass: 0.6}});
   const full = sc.kind === 'full';
-  const top = full ? 1187 : sc.kind === 'cta' ? 1080 : 1330; // 1187 = 61.8% chiều cao
+  const top = full ? 1420 : sc.kind === 'cta' ? 1080 : 1330; // 1187 = 61.8% chiều cao
   return (
     <div style={{position: 'absolute', top, left: 68, right: 68, display: 'flex', justifyContent: 'center'}}>
       <div style={{fontSize: full ? 62 : 48, fontWeight: 900, textAlign: 'center', lineHeight: 1.25, opacity: pop,
@@ -82,10 +85,10 @@ const Sfx: React.FC = () => {
   const hits: [string, number, number][] = [
     ['pop', 2, 0.5], ['pop', 2 + T.beat.a, 0.4], ['pop', 2 + T.beat.b + T.beat.a, 0.4], ['ding', 2 + T.beat.d, 0.45],
     ['whoosh', fr(HOOK_END) - 8, 0.5],
-    ['stamp', fr(6) + T.beat.c - 2, 0.6], ['whoosh', fr(S2_ZOOM) - 3, 0.35],
+    ['stamp', fr(SCENES[1].start) + T.beat.c - 2, 0.6], ['whoosh', fr(S2_ZOOM) - 3, 0.35],
     ...CUTS.map((c) => ['whoosh', fr(c) - 8, 0.55] as [string, number, number]),
     ...(['i1', 'i2', 'i3'] as const).map((k) => ['pop', fr(S3[k][0]) - 2, 0.45] as [string, number, number]),
-    ['ding', fr(67) + T.beat.c * 4 + T.beat.b - 2, 0.55], ['cash', fr(67) + T.beat.c * 4 + T.beat.b + 3, 0.5],
+    ['ding', fr(SCENES[3].start) + T.beat.c * 4 + T.beat.b - 2, 0.55], ['cash', fr(SCENES[3].start) + T.beat.c * 4 + T.beat.b + 3, 0.5],
     ['ding', fr(CTA_AT) - 2, 0.5],
   ];
   return <>{hits.map(([n, at, v], i) => <Sequence key={i} from={Math.max(0, at)} durationInFrames={45}><Audio src={staticFile(`sfx/${n}.wav`)} volume={v} /></Sequence>)}</>;
@@ -102,8 +105,8 @@ export const Reel: React.FC = () => (
     <Grade />
     <Grain />
     <Vignette />
-    {HAS_VIDEO && <Audio src={staticFile('talk.mp4')} />}
-    <Audio loop src={staticFile('sfx/pad.wav')} volume={(f) => interpolate(f, [0, 30, fr(86) - 45, fr(86)], [0, 0.16, 0.16, 0], clamp)} />
+    {HAS_VIDEO ? <Audio src={staticFile('talk.mp4')} /> : <Audio src={staticFile(VOICE_FILE)} />}
+    <Audio loop src={staticFile('sfx/pad.wav')} volume={(f) => interpolate(f, [0, 30, fr(TOTAL) - 45, fr(TOTAL)], [0, 0.1, 0.1, 0], clamp)} />
     <Sfx />
   </AbsoluteFill>
 );

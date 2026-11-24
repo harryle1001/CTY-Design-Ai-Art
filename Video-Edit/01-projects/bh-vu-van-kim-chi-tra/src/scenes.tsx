@@ -3,7 +3,7 @@ import {AbsoluteFill, Img, Sequence, interpolate, staticFile, useCurrentFrame} f
 import {T} from './theme';
 import {CTA_AT, HOOK_END, S2_ZOOM, S3, fr} from './timing';
 import {
-  BgMesh, Bill, BottomStrip, Contract, IBan, ICheck, IChat, IGift, IKey, IWarn, IX, LogoBadge, Talent,
+  VoiceBars, BgMesh, Bill, BottomStrip, Contract, IBan, ICheck, IChat, IGift, IKey, IWarn, IX, LogoBadge, Talent,
   enter, exitStyle, useBreathe, useExit, useSpring,
 } from './components';
 
@@ -43,8 +43,8 @@ export const Scene1: React.FC<SP> = ({from, dur}) => {
   return (
     <AbsoluteFill>
       <Talent from={from} style={{inset: 0}} />
-      <LogoBadge delay={hook} />
-      <div style={{position: 'absolute', top: 300, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, ...enter(t), ...exitStyle(e)}}>
+      <LogoBadge delay={hook} top={60} scale={0.45} right />
+      <div style={{position: 'absolute', top: 1060, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, ...enter(t), ...exitStyle(e)}}>
         <Pill>CÓ BẢO HIỂM = CHẮC CHẮN</Pill>
         <Pill bg={T.navy}>ĐƯỢC CHI TRẢ?</Pill>
       </div>
@@ -58,7 +58,7 @@ export const Scene2: React.FC<SP> = ({from, dur}) => {
   const f = useCurrentFrame();
   const zAt = fr(S2_ZOOM) - from;
   const zoom = interpolate(f, [zAt, zAt + T.beat.c], [1, 1.14], {...clamp, easing: T.ease});
-  const stampAt = T.beat.c, chipsAt = Math.round(dur * 0.62);
+  const stampAt = T.beat.c + T.beat.b, chipsAt = Math.round(dur * 0.7);
   const stamp = useSpring(stampAt, {damping: 9, stiffness: 180, mass: 0.7});
   const stampOut = interpolate(f, [chipsAt - T.beat.b, chipsAt], [1, 0], clamp);
   const title = useSpring(T.beat.a);
@@ -68,16 +68,16 @@ export const Scene2: React.FC<SP> = ({from, dur}) => {
   return (
     <AbsoluteFill>
       <Talent from={from} zoom={zoom} style={{inset: 0}} />
-      <LogoBadge />
-      <div style={{position: 'absolute', top: 300, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, ...enter(title), ...exitStyle(e)}}>
+      <LogoBadge top={60} scale={0.45} right />
+      <div style={{position: 'absolute', top: 1020, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, ...enter(title), ...exitStyle(e)}}>
         <Pill><IWarn size={42} /> NHẦM LẪN 3 KHÁI NIỆM CỐT LÕI</Pill>
-        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10}}>
+        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, opacity: f >= chipsAt ? 1 : 0}}>
           {names.map(([n, c], i) => (
             <div key={n} style={{...enter(chips[i], 26), background: T.glass, color: c, fontWeight: 800, fontSize: T.fs.s, padding: '6px 26px',
               borderRadius: 42, borderLeft: `10px solid ${c}`, boxShadow: T.shadow}}>{i + 1}. {n}</div>))}
         </div>
       </div>
-      <div style={{position: 'absolute', top: 900, width: '100%', display: 'flex', justifyContent: 'center', opacity: stamp * stampOut}}>
+      <div style={{position: 'absolute', top: 1140, width: '100%', display: 'flex', justifyContent: 'center', opacity: stamp * stampOut}}>
         <div style={{transform: `rotate(-8deg) scale(${2 - stamp})`, border: `8px solid ${T.red}`, color: T.red, background: 'rgba(255,255,255,.9)',
           fontSize: T.fs.m, fontWeight: 900, padding: '10px 26px', borderRadius: 16, textAlign: 'center', lineHeight: 1.1}}>
           KHÔNG PHẢI LÚC NÀO<br />CŨNG ĐƯỢC CHI TRẢ</div>
@@ -193,7 +193,7 @@ export const Scene3: React.FC<SP> = ({from, dur}) => {
       <LogoBadge top={130} />
       <Sequence from={intro.from} durationInFrames={intro.d}><Ticket dur={intro.d} /></Sequence>
       {parts.map((p, i) => <Sequence key={i} from={p.from} durationInFrames={p.d}><ItemCard it={ITEMS[i]} dur={p.d} /></Sequence>)}
-      <TalentBubble from={from} left={760} top={1560} size={280} />
+      <BubbleWithBars from={from} left={760} top={1540} size={280} />
     </AbsoluteFill>
   );
 };
@@ -205,6 +205,15 @@ const TalentBubble: React.FC<{from: number; left: number; top: number; size: num
       boxShadow: T.shadow, transform: `scale(${s})`}}>
       <Talent from={from} style={{inset: 0}} />
     </div>
+  );
+};
+const BubbleWithBars: React.FC<{from: number; left: number; top: number; size: number; delay?: number}> = (p) => {
+  const s = useSpring((p.delay ?? T.beat.b) + T.beat.b);
+  return (
+    <>
+      <TalentBubble {...p} />
+      <VoiceBars from={p.from} style={{position: 'absolute', left: p.left + p.size / 2 - 70, top: p.top + p.size - 26, opacity: s}} />
+    </>
   );
 };
 
@@ -240,7 +249,7 @@ export const Scene4: React.FC<SP> = ({from, dur}) => {
         </div>
       </div>
       <MoneyRain at={eqAt + T.beat.a} />
-      <TalentBubble from={from} left={42} top={1440} size={300} delay={T.beat.a} />
+      <BubbleWithBars from={from} left={42} top={1420} size={300} delay={T.beat.a} />
     </AbsoluteFill>
   );
 };
@@ -273,7 +282,7 @@ export const Scene5: React.FC<SP> = ({from, dur}) => {
   return (
     <AbsoluteFill>
       <Img src={staticFile('frame.jpg')} style={{width: 1080, height: 1920}} />
-      <div style={{position: 'absolute', top: 440, left: 162, width: 756, height: 600, borderRadius: 42, overflow: 'hidden', border: '8px solid #fff', boxShadow: T.shadow, ...enter(box, 68)}}>
+      <div style={{position: 'absolute', top: 430, left: 240, width: 600, height: 620, borderRadius: 42, overflow: 'hidden', border: '8px solid #fff', boxShadow: T.shadow, ...enter(box, 68)}}>
         <Talent from={from} style={{inset: 0}} />
       </div>
       <div style={{position: 'absolute', top: 1070, left: 68, right: 68, ...enter(cta, 42)}}>
