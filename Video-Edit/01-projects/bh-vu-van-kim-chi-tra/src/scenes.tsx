@@ -231,6 +231,7 @@ export const Scene4: React.FC<SP> = ({from, dur}) => {
   return (
     <AbsoluteFill>
       <Img src={staticFile('frame.jpg')} style={{width: 1080, height: 1920, transform: `scale(${kb})`, transformOrigin: '50% 100%'}} />
+      <MoneyRain at={eqAt + T.beat.a} />
       <div style={{position: 'absolute', top: 470, width: '100%', textAlign: 'center', ...enter(head), opacity: e}}>
         <Pill bg={T.navy} size={T.fs.s}>TÓM LẠI: CÔNG THỨC ĐƯỢC CHI TRẢ</Pill>
       </div>
@@ -248,7 +249,6 @@ export const Scene4: React.FC<SP> = ({from, dur}) => {
             <ICheck size={68} /></div>
         </div>
       </div>
-      <MoneyRain at={eqAt + T.beat.a} />
       <BubbleWithBars from={from} left={42} top={1420} size={300} delay={T.beat.a} />
     </AbsoluteFill>
   );
