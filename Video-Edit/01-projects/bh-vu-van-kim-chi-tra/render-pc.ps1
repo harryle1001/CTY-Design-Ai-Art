@@ -1,4 +1,4 @@
-# Render reel "Bảo hiểm Vũ Văn Kim" trên PC Windows
+﻿# Render reel "Bảo hiểm Vũ Văn Kim" trên PC Windows
 # Chạy trong PowerShell tại thư mục dự án:  powershell -ExecutionPolicy Bypass -File .\render-pc.ps1
 # Cần sẵn: Git, Node.js 18+, Python 3.10 (py -3.10), ffmpeg (winget install Gyan.FFmpeg)
 $ErrorActionPreference = 'Stop'
@@ -44,10 +44,10 @@ foreach ($n in 1, 2) {
   $dst = "$P\public\lip\lip$n.mp4"
   if (Test-Path $dst) { Write-Host "Đã có lip$n.mp4, bỏ qua"; continue }
   $out = "$P\out\lip-run$n"
-  $args = @('inference.py', '--driven_audio', "$P\lip-input\a$n.wav", '--source_image', "$P\lip-input\face.png",
+  $a = @('inference.py', '--driven_audio', "$P\lip-input\a$n.wav", '--source_image', "$P\lip-input\face.png",
             '--result_dir', $out, '--still', '--preprocess', 'full', '--enhancer', 'gfpgan')
-  if (-not $gpu) { $args += '--cpu' }
-  & $py @args
+  if (-not $gpu) { $a += '--cpu' }
+  & $py @a
   $mp4 = Get-ChildItem $out -Filter *.mp4 | Sort-Object LastWriteTime | Select-Object -Last 1
   Copy-Item $mp4.FullName $dst
   Write-Host "Xong lip$n.mp4" -ForegroundColor Green
